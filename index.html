@@ -115,7 +115,7 @@ nav svg{width:22px;height:22px}
 .chip{padding:7px 12px;border-radius:99px;border:1px dashed #c9c1ae;background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
 .chip:hover{border-style:solid}
 .side .who span{white-space:nowrap}
-body.ro form, body.ro main button, body.ro .x, body.ro .line li button, body.ro .side .btns, body.ro [data-fill], body.ro #startBtn, body.ro select{display:none!important}
+body.ro .adm, body.ro form, body.ro main button, body.ro .x, body.ro .line li button, body.ro .side .btns, body.ro [data-fill], body.ro #startBtn, body.ro select{display:none!important}
 body.ro .chk, body.ro .sc, body.ro [data-rm], body.ro .chip{pointer-events:none}
 .orgbtn{font-size:12px;padding:6px 10px;border-radius:99px;background:#fff;color:var(--ink);border:1px solid var(--line)}
 .short{font-size:11px;font-weight:700;background:#fff3;padding:2px 8px;border-radius:99px}
@@ -125,7 +125,7 @@ body.ro .chk, body.ro .sc, body.ro [data-rm], body.ro .chip{pointer-events:none}
   <section class="view on" id="v-cheg">
     <div class="card">
       <h2><span>Lista de presença <span class="pill" id="cntPres">0</span></span></h2>
-      <p class="muted" style="margin-bottom:6px">Toque no nome quando a pessoa chegar: o horário é marcado e ela entra no fim da fila.</p>
+      <p class="muted adm" style="margin-bottom:6px">Toque no nome quando a pessoa chegar: o horário é marcado e ela entra no fim da fila.</p>
       <ul class="plist" id="rosterWrap"></ul>
       <form class="row" id="addForm" style="margin-top:12px">
         <input type="text" id="addName" placeholder="Novo nome (pode colar vários)" autocomplete="off">
@@ -169,19 +169,24 @@ const SB_URL="https://chinzcadvrrrzzbjpwfp.supabase.co";
 const SB_KEY="sb_publishable_QqOUJy9Sq00XhvhUKq08qQ_tziQrYV-";
 const PID="principal";
 const LS="pelada-volei-v2", LSPIN="pelada-volei-pin";
-let sb=null, dirty=false, writing=false, pending=false, saveTimer=null, lastJSON="", PIN=null;
-try{PIN=localStorage.getItem(LSPIN)}catch(e){}
+let sb=null, dirty=false, writing=false, pending=false, saveTimer=null, lastJSON="", PIN=null, ME=null;
+const ADMIN_LINK=new URLSearchParams(location.search).has("admin");
+const BASE=location.origin+location.pathname;
+const LINK_GRUPO=BASE, LINK_ADMIN=BASE+"?admin";
+try{ if(ADMIN_LINK){PIN=localStorage.getItem(LSPIN);ME=JSON.parse(localStorage.getItem(LSPIN+"-me")||"null")} }catch(e){}
 function lsLoad(){try{const r=localStorage.getItem(LS);if(r)return JSON.parse(r)}catch(e){}return null}
 function lsSave(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
 function setSync(st,txt){document.getElementById("syncDot").className="dot "+(st||"");document.getElementById("syncTxt").textContent=txt}
 function norm(o){const s=Object.assign(blank(),o||{});if(!Array.isArray(s.court)||s.court.length!==2||!Array.isArray(s.court[0]))s.court=[[],[]];if(!Array.isArray(s.line))s.line=[];if(!Array.isArray(s.courtNo))s.courtNo=[1,2];if(!s.arr)s.arr={};return s}
-function isOrg(){return !!PIN}
+function isOrg(){return ADMIN_LINK&&!!PIN}
+function forget(){PIN=null;ME=null;try{localStorage.removeItem(LSPIN);localStorage.removeItem(LSPIN+"-me")}catch(e){}}
 function applyMode(){
   document.body.classList.toggle("ro",!isOrg());
-  const b=document.getElementById("orgBtn"); if(b) b.textContent=isOrg()?"Organizador ✓":"Entrar como organizador";
+  const b=document.getElementById("orgBtn");
+  if(b){ b.style.display=ADMIN_LINK?"":"none"; b.textContent=isOrg()?("👤 "+(ME&&ME.nome||"Admin")):"Entrar"; }
 }
 function save(){
-  if(!isOrg()){ try{ S=norm(lastJSON?JSON.parse(lastJSON):lsLoad()) }catch(e){} render(); toast("Modo espectador: entre com o PIN pra alterar"); return }
+  if(!isOrg()){ try{ S=norm(lastJSON?JSON.parse(lastJSON):lsLoad()) }catch(e){} render(); if(ADMIN_LINK) toast("Entre com seu PIN pra alterar"); return }
   dirty=true; lsSave(); render();
   if(!sb) return;
   clearTimeout(saveTimer); saveTimer=setTimeout(flush,300);
@@ -193,7 +198,7 @@ async function flush(){
   try{
     const {data,error}=await sb.rpc("pelada_salvar",{p_id:PID,p_pin:PIN,p_data:JSON.parse(j)});
     if(error) throw error;
-    if(data===false){PIN=null;try{localStorage.removeItem(LSPIN)}catch(e){};applyMode();setSync("warn","PIN inválido");toast("PIN inválido — entre de novo");}
+    if(data===false){forget();applyMode();setSync("warn","PIN inválido");toast("Seu PIN não vale mais — entre de novo");loginOrg()}
     else {lastJSON=j;if(JSON.stringify(S)===j)dirty=false;setSync("on","salvo na nuvem")}
   }catch(e){setSync("warn","sem conexão — tentando de novo");setTimeout(flush,4000)}
   writing=false; if(pending){pending=false;flush()}
@@ -204,33 +209,41 @@ function applyRemote(d){
   if(j!==JSON.stringify(S)){S=norm(JSON.parse(j));lsSave();render()}
 }
 async function loginOrg(){
-  modal(`<h3>Entrar como organizador</h3><p class="muted">Com o PIN você marca presença, placar e fila. Sem ele, dá pra acompanhar tudo ao vivo.</p>
-    <form id="pinForm" class="opts"><input type="text" inputmode="numeric" id="pinIn" placeholder="PIN" autocomplete="off" style="font-size:20px;text-align:center;letter-spacing:.3em">
+  modal(`<h3>Entrar como administrador</h3><p class="muted">Digite o seu PIN pra marcar presença, placar e fila.</p>
+    <form id="pinForm" class="opts"><input type="password" inputmode="numeric" id="pinIn" placeholder="PIN" autocomplete="off" style="font-size:20px;text-align:center;letter-spacing:.3em">
     <p class="muted" id="pinErr" style="color:var(--bad)"></p>
-    <button class="acc" type="submit">Entrar</button><button class="ghost" type="button" id="pinNo">Cancelar</button></form>`);
+    <button class="acc" type="submit">Entrar</button><button class="ghost" type="button" id="pinNo">Só acompanhar</button></form>`);
   setTimeout(()=>{const i=document.getElementById("pinIn");i&&i.focus()},50);
   document.getElementById("pinNo").onclick=closeModal;
   document.getElementById("pinForm").onsubmit=async e=>{
     e.preventDefault(); const v=document.getElementById("pinIn").value.trim(); const er=document.getElementById("pinErr");
     if(!sb){er.textContent="Sem conexão com o banco.";return}
     er.textContent="Verificando…";
-    const {data,error}=await sb.rpc("pelada_checar_pin",{p_id:PID,p_pin:v});
+    const {data,error}=await sb.rpc("pelada_login",{p_id:PID,p_pin:v});
     if(error){er.textContent=error.message||"Erro";return}
     if(!data){er.textContent="PIN errado.";return}
-    PIN=v; try{localStorage.setItem(LSPIN,v)}catch(e){}
-    closeModal(); applyMode(); render(); toast("Modo organizador ativado");
+    PIN=v; ME=data; try{localStorage.setItem(LSPIN,v);localStorage.setItem(LSPIN+"-me",JSON.stringify(data))}catch(e){}
+    closeModal(); applyMode(); render(); toast(`Olá, ${data.nome}! Modo administrador ativado`);
   };
 }
+async function copy(txt,msg){try{await navigator.clipboard.writeText(txt);toast(msg)}catch(e){toast("Copie: "+txt)}}
 function orgMenu(){
   if(!isOrg()) return loginOrg();
-  modal(`<h3>Organizador</h3><div class="opts">
-    <button class="ghost" id="chgPin">Trocar PIN</button>
-    <button class="ghost" id="logout">Sair do modo organizador</button>
+  modal(`<h3>${esc(ME&&ME.nome||"Administrador")}${ME&&ME.dono?' <span class="pill">dono</span>':''}</h3>
+    <p class="muted" style="margin-top:6px">Link do grupo (só acompanha):<br><b style="word-break:break-all">${esc(LINK_GRUPO)}</b></p>
+    <div class="opts">
+    <button class="acc" id="cpGrupo">Copiar link do grupo</button>
+    ${ME&&ME.dono?`<button class="ghost" id="admins">Administradores</button><button class="ghost" id="cpAdmin">Copiar link de administrador</button>`:""}
+    <button class="ghost" id="chgPin">Trocar meu PIN</button>
+    <button class="ghost" id="logout">Sair</button>
     <button class="ghost" id="mNo">Fechar</button></div>`);
   document.getElementById("mNo").onclick=closeModal;
-  document.getElementById("logout").onclick=()=>{PIN=null;try{localStorage.removeItem(LSPIN)}catch(e){};closeModal();applyMode();render()};
+  document.getElementById("cpGrupo").onclick=()=>copy(LINK_GRUPO,"Link do grupo copiado");
+  const ca=document.getElementById("cpAdmin"); if(ca) ca.onclick=()=>copy(LINK_ADMIN,"Link de administrador copiado");
+  const ad=document.getElementById("admins"); if(ad) ad.onclick=adminsMenu;
+  document.getElementById("logout").onclick=()=>{forget();closeModal();applyMode();render()};
   document.getElementById("chgPin").onclick=()=>{
-    modal(`<h3>Trocar PIN</h3><form id="cpf" class="opts"><input type="text" inputmode="numeric" id="np" placeholder="Novo PIN (4+ dígitos)" autocomplete="off">
+    modal(`<h3>Trocar meu PIN</h3><form id="cpf" class="opts"><input type="password" inputmode="numeric" id="np" placeholder="Novo PIN (4+ dígitos)" autocomplete="off">
       <p class="muted" id="cpe" style="color:var(--bad)"></p><button class="acc" type="submit">Salvar</button><button class="ghost" type="button" id="cpn">Cancelar</button></form>`);
     document.getElementById("cpn").onclick=closeModal;
     document.getElementById("cpf").onsubmit=async e=>{
@@ -240,6 +253,34 @@ function orgMenu(){
       if(error||!data){er.textContent=(error&&error.message)||"Não foi possível trocar.";return}
       PIN=v; try{localStorage.setItem(LSPIN,v)}catch(e){}; closeModal(); toast("PIN trocado");
     };
+  };
+}
+async function adminsMenu(){
+  modal(`<h3>Administradores</h3><p class="muted">Carregando…</p>`);
+  const {data,error}=await sb.rpc("pelada_listar_admins",{p_id:PID,p_pin:PIN});
+  if(error||!data){modal(`<h3>Administradores</h3><p class="muted">${esc((error&&error.message)||"Só o dono gerencia administradores.")}</p><div class="opts"><button class="ghost" id="mNo">Fechar</button></div>`);document.getElementById("mNo").onclick=closeModal;return}
+  modal(`<h3>Administradores</h3>
+    <p class="muted">Eles alteram a lista, a fila e o placar. Mande o link de administrador e o PIN de cada um em particular.</p>
+    <ul class="plist" style="margin-top:8px">${data.map(a=>`<li><span class="nm">${esc(a.nome)}</span>${a.dono?'<span class="pill">dono</span>':`<button class="ghost sm" data-rm="${a.id}">Remover</button>`}</li>`).join("")}</ul>
+    <form id="addAdm" class="opts" style="margin-top:12px">
+      <input type="text" id="admNome" placeholder="Nome do administrador" autocomplete="off">
+      <input type="text" inputmode="numeric" id="admPin" placeholder="PIN dele (4+ dígitos)" autocomplete="off">
+      <p class="muted" id="admErr" style="color:var(--bad)"></p>
+      <button class="acc" type="submit">Adicionar administrador</button>
+      <button class="ghost" type="button" id="cpAdm2">Copiar link de administrador</button>
+      <button class="ghost" type="button" id="mNo">Fechar</button></form>`);
+  document.getElementById("mNo").onclick=closeModal;
+  document.getElementById("cpAdm2").onclick=()=>copy(LINK_ADMIN,"Link de administrador copiado");
+  document.querySelectorAll("#mbox [data-rm]").forEach(b=>b.onclick=async()=>{
+    b.disabled=true; const {data:r}=await sb.rpc("pelada_remover_admin",{p_id:PID,p_pin:PIN,p_admin:b.dataset.rm});
+    toast(r==="ok"?"Administrador removido":(r||"Erro")); adminsMenu();
+  });
+  document.getElementById("addAdm").onsubmit=async e=>{
+    e.preventDefault(); const n=document.getElementById("admNome").value.trim(), pi=document.getElementById("admPin").value.trim(), er=document.getElementById("admErr");
+    if(!n){er.textContent="Informe o nome.";return} if(pi.length<4){er.textContent="PIN com 4+ dígitos.";return}
+    const {data:r,error}=await sb.rpc("pelada_adicionar_admin",{p_id:PID,p_pin:PIN,p_nome:n,p_novo_pin:pi});
+    if(error||r!=="ok"){er.textContent=(error&&error.message)||r||"Erro";return}
+    toast(`${n} agora é administrador`); adminsMenu();
   };
 }
 (async function init(){
@@ -255,6 +296,8 @@ function orgMenu(){
     else if(isOrg()&&S.players.length) flush();
     setSync("on","ao vivo");
   }
+  if(ADMIN_LINK&&!isOrg()) loginOrg();
+  else if(!ADMIN_LINK&&!location.hash&&S.started) go("jogo");
   sb.channel("pelada-"+PID)
     .on("postgres_changes",{event:"*",schema:"public",table:"pelada",filter:"id=eq."+PID},payload=>{
       if(dirty||writing) return;
@@ -465,7 +508,7 @@ function renderGame(){
   const chunks=[]; for(let i=0;i<S.line.length;i+=size) chunks.push(S.line.slice(i,i+size));
   w.innerHTML=`<div class="card">
     <div class="court">${side(S.court[0],0,CA)}<div class="vs">×</div>${side(S.court[1],1,CB)}</div>
-    <p class="muted" style="text-align:center;margin-top:10px">Toque no número pra marcar ponto · toque num nome se alguém foi embora.</p>
+    <p class="muted adm" style="text-align:center;margin-top:10px">Toque no número pra marcar ponto · toque num nome se alguém foi embora.</p>
     <div class="row" style="justify-content:center;margin-top:12px">
       <button class="blue" data-end="0" style="background:${CA}">Vitória ${courtName(0)}</button>
       <button class="blue" data-end="1" style="background:${CB}">Vitória ${courtName(1)}</button>
@@ -478,7 +521,7 @@ function renderGame(){
   <div class="card"><h2>Fila</h2>${chunks.length?chunks.map((c,ci)=>`<div class="sep"><i style="background:${QC[ci%QC.length]}"></i>Time ${S.nextNo+ci} · ${ci===0?"próximo":ci+1+"º"}${c.length<size?` <span class="muted">· faltam ${size-c.length}</span>`:""}</div><p class="muted" style="margin-left:20px">${c.map(id=>esc(nm(id))).join(", ")}</p>`).join("")
      :`<p class="muted">Ninguém esperando — revanche direto.</p>`}
      <p class="muted" style="margin-top:12px">Quem perde vai pro fim da fila. Se o próximo time estiver incompleto, os primeiros do time que perdeu completam.</p></div>
-  <div class="card"><h2>Regras</h2>
+  <div class="card adm"><h2>Regras</h2>
     <div class="row"><label class="muted">Jogo até</label>
       <select id="target">${[7,10,12,15,21,25].map(n=>`<option ${S.target===n?"selected":""}>${n}</option>`).join("")}</select>
       <span class="muted">pontos (2 de vantagem)</span></div>
