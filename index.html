@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f4f1ea">
+<meta name="theme-color" content="#F8F7F3">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-32.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Vôlei CCV">
 <title>Vôlei CCV</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f4f1ea; --card:#fff; --ink:#1b1d1f; --mut:#6d6a63; --line:#e4dfd3;
@@ -20,7 +20,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:84px}
-h1,h2,h3,.num{font-family:Archivo,sans-serif}
+h1,h2,h3,.num{font-family:var(--pf)}
 header{padding:18px 18px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:760px;margin:0 auto}
 header h1{font-size:22px;font-weight:900;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
 .ball{width:26px;height:26px;border-radius:50%;background:conic-gradient(var(--acc) 0 33%,#fff 0 66%,var(--acc2) 0);border:2px solid var(--ink)}
@@ -54,7 +54,7 @@ button:disabled{opacity:.4;cursor:default}
 .pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;background:#efeadf;color:var(--ink)}
 .teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
 .team{border-radius:var(--r);border:1px solid var(--line);background:#fff;overflow:hidden}
-.team .hd{padding:10px 12px;color:#fff;display:flex;justify-content:space-between;align-items:center;font-family:Archivo;font-weight:700}
+.team .hd{padding:10px 12px;color:#fff;display:flex;justify-content:space-between;align-items:center;font-family:var(--pf);font-weight:700}
 .team ul{list-style:none;padding:6px 12px 10px}
 .team li{padding:6px 0;display:flex;justify-content:space-between;gap:6px;border-bottom:1px dashed var(--line);font-size:14px;cursor:pointer}
 .team li:last-child{border-bottom:0}
@@ -62,12 +62,12 @@ button:disabled{opacity:.4;cursor:default}
 .tag{font-size:11px;font-weight:700;background:rgba(255,255,255,.25);padding:2px 8px;border-radius:99px}
 .court{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
 .side{border-radius:var(--r);padding:14px 10px;color:#fff;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center}
-.side .tn{font-family:Archivo;font-weight:700;font-size:16px}
-.side .sc{font-family:Archivo;font-weight:900;font-size:72px;line-height:1;letter-spacing:-.04em;cursor:pointer;user-select:none;width:100%}
+.side .tn{font-family:var(--pf);font-weight:700;font-size:16px}
+.side .sc{font-family:var(--pf);font-weight:900;font-size:72px;line-height:1;letter-spacing:-.04em;cursor:pointer;user-select:none;width:100%}
 .side .btns{display:flex;gap:6px}
 .side .btns button{background:rgba(255,255,255,.22);padding:8px 14px;font-size:18px}
 .side .who{font-size:12px;opacity:.9;line-height:1.4}
-.vs{align-self:center;font-family:Archivo;font-weight:900;color:var(--mut)}
+.vs{align-self:center;font-family:var(--pf);font-weight:900;color:var(--mut)}
 .queue{display:flex;gap:8px;flex-wrap:wrap}
 .queue .q{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:99px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:600}
 .queue .q i{width:10px;height:10px;border-radius:50%}
@@ -92,20 +92,20 @@ nav svg{width:22px;height:22px}
 .toast.on{opacity:1}
 .empty{text-align:center;padding:24px 10px;color:var(--mut)}
 .stat{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:6px}
-.stat div{font-size:13px;color:var(--mut)} .stat b{display:block;font-family:Archivo;font-size:22px;color:var(--ink)}
+.stat div{font-size:13px;color:var(--mut)} .stat b{display:block;font-family:var(--pf);font-size:22px;color:var(--ink)}
 @media (max-width:420px){ .side .sc{font-size:58px} }
 </style>
 </head>
 <body>
 <header>
-  <h1><span class="ball"></span>Vôlei CCV</h1>
+  <h1>Vôlei CCV<i>.</i></h1>
   <div class="row" style="gap:10px;justify-content:flex-end"><div class="sync"><span class="dot" id="syncDot"></span><span id="syncTxt">carregando…</span></div><button class="orgbtn" id="orgBtn">Entrar</button></div>
 </header>
 
 <style>
-.sep{display:flex;align-items:center;gap:8px;margin:14px 0 4px;font-family:Archivo;font-weight:700;font-size:14px}
+.sep{display:flex;align-items:center;gap:8px;margin:14px 0 4px}
 .sep i{width:12px;height:12px;border-radius:4px}
-.sep .muted{font-family:Inter;font-weight:500}
+.sep .muted{font-family:var(--sans);font-weight:300}
 .line{list-style:none}
 .line li{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line)}
 .line li .pos{width:26px;height:26px;border-radius:8px;background:#efeadf;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
@@ -117,9 +117,78 @@ nav svg{width:22px;height:22px}
 .side .who span{white-space:nowrap}
 body.ro main .adm, body.ro main form, body.ro main button, body.ro .x, body.ro .line li button, body.ro .side .btns, body.ro [data-fill], body.ro #startBtn, body.ro main select{display:none!important}
 body.ro .chk, body.ro .sc, body.ro [data-rm], body.ro .chip{pointer-events:none}
-.orgbtn.lock{padding:6px 9px;opacity:.55;font-size:13px}
+.orgbtn.lock{padding:6px 9px;font-size:13px}
 .orgbtn{font-size:12px;padding:6px 10px;border-radius:99px;background:#fff;color:var(--ink);border:1px solid var(--line)}
 .short{font-size:11px;font-weight:700;background:#fff3;padding:2px 8px;border-radius:99px}
+
+/* ===== Identidade Saz ===== */
+:root{
+  --bg:#F8F7F3; --bg2:#EFEFE7; --card:#FFFFFF; --ink:#343D2E; --mut:#7A7D72; --line:#DEDFD6;
+  --acc:#626D4B; --acc2:#343D2E; --ok:#626D4B; --bad:#B3402F; --lt:#AEB894; --lt2:#C1C9AE;
+  --pf:"Instrument Serif",Georgia,serif; --sans:"DM Sans",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  --r:14px;
+}
+body{font:300 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased;background:var(--bg)}
+b,strong{font-weight:500}
+h1,h2,h3,.num{font-family:var(--pf);font-weight:400;letter-spacing:-.01em}
+header{padding:22px 18px 12px}
+header h1{font:400 30px/1 var(--pf);letter-spacing:-.02em;color:var(--ink);gap:0}
+header h1 i{font-style:normal;color:var(--acc)}
+.card{border-radius:14px;border-color:var(--line);box-shadow:none;padding:18px}
+.card h2{font:400 22px/1.15 var(--pf);margin-bottom:12px}
+.card h2::after{content:none}
+.muted{color:var(--mut);font-weight:300}
+button{font:400 14px var(--sans);border-radius:10px;background:var(--ink);letter-spacing:.01em}
+button.acc{background:var(--acc);color:#fff}
+button.blue{background:var(--ink)}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.ghost:hover{border-color:var(--acc)}
+button.sm{font-size:12.5px}
+input[type=text],input[type=password],select{font:300 15px var(--sans);border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:11px 12px}
+input:focus,select:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(98,109,75,.15)}
+.pill{background:var(--bg2);color:var(--ink);font-weight:400;font-size:11.5px;letter-spacing:.02em}
+.chk{border-radius:50%;border:1.5px solid var(--lt);font-weight:500;font-size:13px}
+.chk.on{background:var(--acc);border-color:var(--acc)}
+.plist li,.line li,.hist li{border-bottom-color:var(--line)}
+.line li .pos{background:var(--bg2);color:var(--ink);font-weight:500;border-radius:50%}
+.sep{font:400 18px/1.2 var(--pf);letter-spacing:-.005em;margin:18px 0 4px}
+.sep i{width:9px;height:9px;border-radius:50%}
+.side{border-radius:20px;padding:16px 10px}
+.side .tn{font:400 22px/1 var(--pf)}
+.side .sc{font:400 88px/1 var(--pf);letter-spacing:-.03em}
+.side .btns button{background:rgba(248,247,243,.16);border-radius:10px}
+.side .who{font-weight:300}
+.tag,.short{background:rgba(248,247,243,.18);font-weight:400;letter-spacing:.04em}
+.vs{font:italic 400 26px var(--pf);color:var(--lt)}
+.queue .q{border-color:var(--line);font-weight:400}
+.dot.on{background:var(--acc)} .dot.warn{background:#C9A24A}
+.sync{font-weight:300;letter-spacing:.02em}
+.orgbtn{border-radius:30px;border:1px solid var(--line);background:transparent;color:var(--ink);font-weight:400}
+nav{background:var(--bg);border-top:1px solid var(--line)}
+nav button{color:var(--mut);font:400 11px var(--sans);letter-spacing:.14em;text-transform:uppercase;background:none}
+nav button.on{color:var(--ink)}
+nav button.on svg{color:var(--acc)}
+nav svg{stroke-width:1.5}
+.modal{background:rgba(52,61,46,.45)}
+.modal .box{border-radius:20px;background:var(--bg)}
+.modal h3{font:400 24px/1.15 var(--pf)}
+.toast{background:var(--ink);font-weight:300;border-radius:30px}
+table th{font:500 11px var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
+.stat b{font:400 30px/1.1 var(--pf)}
+.stat div{font-weight:300}
+.chip{border-color:var(--lt);font-weight:400}
+.empty{font-weight:300}
+.card h2 .pill,.card h2 .muted,.card h2 label,.card h2 button{font-family:var(--sans)}
+.card h2 .muted,.card h2 label{font-size:13px;font-weight:300}
+.orgbtn svg{width:14px;height:14px;vertical-align:-2px}
+.sep{flex-wrap:wrap;row-gap:2px}
+.sep .muted{flex:1 1 100%;padding-left:17px;font-size:13px;line-height:1.4}
+.line li button{color:var(--lt);font-size:12px}
+.line li button[data-a="out"]{font-size:16px}
+.eyebrow{display:block;font:500 10.5px/1 var(--sans);letter-spacing:.28em;text-transform:uppercase;color:var(--acc);margin-bottom:6px}
+footer.saz{max-width:760px;margin:6px auto 0;padding:10px 18px 24px;display:flex;justify-content:center;align-items:baseline;gap:8px;color:var(--mut);font:300 12px var(--sans);letter-spacing:.06em}
+footer.saz b{font:400 18px/1 var(--pf);letter-spacing:-.02em;color:var(--ink);font-weight:400}
+footer.saz b i{font-style:normal;color:var(--acc)}
 </style>
 <main>
   <!-- CHEGADA -->
@@ -148,6 +217,7 @@ body.ro .chk, body.ro .sc, body.ro [data-rm], body.ro .chip{pointer-events:none}
   <section class="view" id="v-rank"><div id="rankWrap"></div></section>
 </main>
 
+<footer class="saz">desenvolvido por <b>saz<i>.</i></b> arquitetura</footer>
 <nav><div class="in">
   <button data-v="cheg" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>Chegada</button>
   <button data-v="jogo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3c-2.5 3-2.5 15 0 18M3.5 9c4 1 13 1 17 0M4 15.5c4.5-1 11.5-1 16 0"/></svg>Jogo</button>
@@ -159,7 +229,7 @@ body.ro .chk, body.ro .sc, body.ro [data-rm], body.ro .chip{pointer-events:none}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const CA="#1f4fd1", CB="#d63a2f", QC=["#1d9a5b","#d49a00","#7a3fc4","#0e8fa3","#d43f86","#8a5a2b"];
+const CA="#343D2E", CB="#626D4B", QC=["#AEB894","#7A7D72","#C1C9AE","#4d5a3f","#8a9670","#B9B6A0"];
 const uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const blank=()=>({players:[],teamSize:6,target:21,maxStreak:0,line:[],court:[[],[]],courtNo:[1,2],nextNo:1,arr:{},started:false,score:[0,0],streak:{side:null,n:0},history:[],pwins:{},pgames:{},undo:null});
@@ -183,7 +253,7 @@ function forget(){PIN=null;ME=null;try{localStorage.removeItem(LSPIN);localStora
 function applyMode(){
   document.body.classList.toggle("ro",!isOrg());
   const b=document.getElementById("orgBtn");
-  if(b){ b.textContent=isOrg()?("👤 "+(ME&&ME.nome||"Admin")):"🔒"; b.title=isOrg()?"Menu do administrador":"Área do administrador"; b.classList.toggle("lock",!isOrg()); }
+  if(b){ if(isOrg()) b.textContent=(ME&&ME.nome||"Admin"); else b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="#626D4B" stroke-width="1.6" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'; b.title=isOrg()?"Menu do administrador":"Área do administrador"; b.classList.toggle("lock",!isOrg()); }
 }
 function save(){
   if(!isOrg()){ try{ S=norm(lastJSON?JSON.parse(lastJSON):lsLoad()) }catch(e){} render(); return }
@@ -259,7 +329,7 @@ async function adminsMenu(){
   const {data,error}=await sb.rpc("pelada_listar_admins",{p_id:PID,p_pin:PIN});
   if(error||!data){modal(`<h3>Administradores</h3><p class="muted">${esc((error&&error.message)||"Só o dono gerencia administradores.")}</p><div class="opts"><button class="ghost" id="mNo">Fechar</button></div>`);document.getElementById("mNo").onclick=closeModal;return}
   modal(`<h3>Administradores</h3>
-    <p class="muted">Eles alteram a lista, a fila e o placar. É o mesmo link do grupo: mande só o PIN de cada um em particular. Eles entram pelo 🔒 no topo.</p>
+    <p class="muted">Eles alteram a lista, a fila e o placar. É o mesmo link do grupo: mande só o PIN de cada um em particular. Eles entram pelo cadeado no topo.</p>
     <ul class="plist" style="margin-top:8px">${data.map(a=>`<li><span class="nm">${esc(a.nome)}</span>${a.dono?'<span class="pill">dono</span>':`<button class="ghost sm" data-rm="${a.id}">Remover</button>`}</li>`).join("")}</ul>
     <form id="addAdm" class="opts" style="margin-top:12px">
       <input type="text" id="admNome" placeholder="Nome do administrador" autocomplete="off">
@@ -280,7 +350,7 @@ async function adminsMenu(){
     toast(`${n} agora é administrador`); adminsMenu();
   };
 }
-(async function init(){
+async function init(){
   const local=lsLoad(); if(local) S=norm(local);
   applyMode(); render(); setSync("warn","conectando…");
   document.getElementById("orgBtn").onclick=orgMenu;
@@ -307,7 +377,7 @@ async function adminsMenu(){
     const r=await sb.from("pelada").select("data").eq("id",PID).maybeSingle();
     if(!r.error&&r.data&&!writing&&!dirty) applyRemote(r.data.data);
   });
-})();
+}
 
 /* ---------- helpers ---------- */
 const P=id=>S.players.find(p=>p.id===id);
@@ -559,6 +629,7 @@ function renderRank(){
 }
 
 function render(){renderRoster();renderLine();renderGame();renderRank()}
+init();
 </script>
 </body>
 </html>
