@@ -117,6 +117,7 @@ nav svg{width:22px;height:22px}
 .side .who span{white-space:nowrap}
 body.ro .adm, body.ro form, body.ro main button, body.ro .x, body.ro .line li button, body.ro .side .btns, body.ro [data-fill], body.ro #startBtn, body.ro select{display:none!important}
 body.ro .chk, body.ro .sc, body.ro [data-rm], body.ro .chip{pointer-events:none}
+.orgbtn.lock{padding:6px 9px;opacity:.55;font-size:13px}
 .orgbtn{font-size:12px;padding:6px 10px;border-radius:99px;background:#fff;color:var(--ink);border:1px solid var(--line)}
 .short{font-size:11px;font-weight:700;background:#fff3;padding:2px 8px;border-radius:99px}
 </style>
@@ -170,23 +171,22 @@ const SB_KEY="sb_publishable_QqOUJy9Sq00XhvhUKq08qQ_tziQrYV-";
 const PID="principal";
 const LS="pelada-volei-v2", LSPIN="pelada-volei-pin";
 let sb=null, dirty=false, writing=false, pending=false, saveTimer=null, lastJSON="", PIN=null, ME=null;
-const ADMIN_LINK=new URLSearchParams(location.search).has("admin");
-const BASE=location.origin+location.pathname;
-const LINK_GRUPO=BASE, LINK_ADMIN=BASE+"?admin";
-try{ if(ADMIN_LINK){PIN=localStorage.getItem(LSPIN);ME=JSON.parse(localStorage.getItem(LSPIN+"-me")||"null")} }catch(e){}
+const ASK_LOGIN=new URLSearchParams(location.search).has("admin");
+const LINK=location.origin+location.pathname;
+try{ PIN=localStorage.getItem(LSPIN); ME=JSON.parse(localStorage.getItem(LSPIN+"-me")||"null") }catch(e){}
 function lsLoad(){try{const r=localStorage.getItem(LS);if(r)return JSON.parse(r)}catch(e){}return null}
 function lsSave(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
 function setSync(st,txt){document.getElementById("syncDot").className="dot "+(st||"");document.getElementById("syncTxt").textContent=txt}
 function norm(o){const s=Object.assign(blank(),o||{});if(!Array.isArray(s.court)||s.court.length!==2||!Array.isArray(s.court[0]))s.court=[[],[]];if(!Array.isArray(s.line))s.line=[];if(!Array.isArray(s.courtNo))s.courtNo=[1,2];if(!s.arr)s.arr={};return s}
-function isOrg(){return ADMIN_LINK&&!!PIN}
+function isOrg(){return !!PIN}
 function forget(){PIN=null;ME=null;try{localStorage.removeItem(LSPIN);localStorage.removeItem(LSPIN+"-me")}catch(e){}}
 function applyMode(){
   document.body.classList.toggle("ro",!isOrg());
   const b=document.getElementById("orgBtn");
-  if(b){ b.style.display=ADMIN_LINK?"":"none"; b.textContent=isOrg()?("👤 "+(ME&&ME.nome||"Admin")):"Entrar"; }
+  if(b){ b.textContent=isOrg()?("👤 "+(ME&&ME.nome||"Admin")):"🔒"; b.title=isOrg()?"Menu do administrador":"Área do administrador"; b.classList.toggle("lock",!isOrg()); }
 }
 function save(){
-  if(!isOrg()){ try{ S=norm(lastJSON?JSON.parse(lastJSON):lsLoad()) }catch(e){} render(); if(ADMIN_LINK) toast("Entre com seu PIN pra alterar"); return }
+  if(!isOrg()){ try{ S=norm(lastJSON?JSON.parse(lastJSON):lsLoad()) }catch(e){} render(); return }
   dirty=true; lsSave(); render();
   if(!sb) return;
   clearTimeout(saveTimer); saveTimer=setTimeout(flush,300);
@@ -230,16 +230,15 @@ async function copy(txt,msg){try{await navigator.clipboard.writeText(txt);toast(
 function orgMenu(){
   if(!isOrg()) return loginOrg();
   modal(`<h3>${esc(ME&&ME.nome||"Administrador")}${ME&&ME.dono?' <span class="pill">dono</span>':''}</h3>
-    <p class="muted" style="margin-top:6px">Link do grupo (só acompanha):<br><b style="word-break:break-all">${esc(LINK_GRUPO)}</b></p>
+    <p class="muted" style="margin-top:6px">Link único (todo mundo usa o mesmo; só quem tem PIN altera):<br><b style="word-break:break-all">${esc(LINK)}</b></p>
     <div class="opts">
-    <button class="acc" id="cpGrupo">Copiar link do grupo</button>
-    ${ME&&ME.dono?`<button class="ghost" id="admins">Administradores</button><button class="ghost" id="cpAdmin">Copiar link de administrador</button>`:""}
+    <button class="acc" id="cpGrupo">Copiar link</button>
+    ${ME&&ME.dono?`<button class="ghost" id="admins">Administradores</button>`:""}
     <button class="ghost" id="chgPin">Trocar meu PIN</button>
     <button class="ghost" id="logout">Sair</button>
     <button class="ghost" id="mNo">Fechar</button></div>`);
   document.getElementById("mNo").onclick=closeModal;
-  document.getElementById("cpGrupo").onclick=()=>copy(LINK_GRUPO,"Link do grupo copiado");
-  const ca=document.getElementById("cpAdmin"); if(ca) ca.onclick=()=>copy(LINK_ADMIN,"Link de administrador copiado");
+  document.getElementById("cpGrupo").onclick=()=>copy(LINK,"Link copiado");
   const ad=document.getElementById("admins"); if(ad) ad.onclick=adminsMenu;
   document.getElementById("logout").onclick=()=>{forget();closeModal();applyMode();render()};
   document.getElementById("chgPin").onclick=()=>{
@@ -260,17 +259,15 @@ async function adminsMenu(){
   const {data,error}=await sb.rpc("pelada_listar_admins",{p_id:PID,p_pin:PIN});
   if(error||!data){modal(`<h3>Administradores</h3><p class="muted">${esc((error&&error.message)||"Só o dono gerencia administradores.")}</p><div class="opts"><button class="ghost" id="mNo">Fechar</button></div>`);document.getElementById("mNo").onclick=closeModal;return}
   modal(`<h3>Administradores</h3>
-    <p class="muted">Eles alteram a lista, a fila e o placar. Mande o link de administrador e o PIN de cada um em particular.</p>
+    <p class="muted">Eles alteram a lista, a fila e o placar. É o mesmo link do grupo: mande só o PIN de cada um em particular. Eles entram pelo 🔒 no topo.</p>
     <ul class="plist" style="margin-top:8px">${data.map(a=>`<li><span class="nm">${esc(a.nome)}</span>${a.dono?'<span class="pill">dono</span>':`<button class="ghost sm" data-rm="${a.id}">Remover</button>`}</li>`).join("")}</ul>
     <form id="addAdm" class="opts" style="margin-top:12px">
       <input type="text" id="admNome" placeholder="Nome do administrador" autocomplete="off">
       <input type="text" inputmode="numeric" id="admPin" placeholder="PIN dele (4+ dígitos)" autocomplete="off">
       <p class="muted" id="admErr" style="color:var(--bad)"></p>
       <button class="acc" type="submit">Adicionar administrador</button>
-      <button class="ghost" type="button" id="cpAdm2">Copiar link de administrador</button>
       <button class="ghost" type="button" id="mNo">Fechar</button></form>`);
   document.getElementById("mNo").onclick=closeModal;
-  document.getElementById("cpAdm2").onclick=()=>copy(LINK_ADMIN,"Link de administrador copiado");
   document.querySelectorAll("#mbox [data-rm]").forEach(b=>b.onclick=async()=>{
     b.disabled=true; const {data:r}=await sb.rpc("pelada_remover_admin",{p_id:PID,p_pin:PIN,p_admin:b.dataset.rm});
     toast(r==="ok"?"Administrador removido":(r||"Erro")); adminsMenu();
@@ -296,8 +293,8 @@ async function adminsMenu(){
     else if(isOrg()&&S.players.length) flush();
     setSync("on","ao vivo");
   }
-  if(ADMIN_LINK&&!isOrg()) loginOrg();
-  else if(!ADMIN_LINK&&!location.hash&&S.started) go("jogo");
+  if(ASK_LOGIN&&!isOrg()) loginOrg();
+  else if(!isOrg()&&!location.hash&&S.started) go("jogo");
   sb.channel("pelada-"+PID)
     .on("postgres_changes",{event:"*",schema:"public",table:"pelada",filter:"id=eq."+PID},payload=>{
       if(dirty||writing) return;
